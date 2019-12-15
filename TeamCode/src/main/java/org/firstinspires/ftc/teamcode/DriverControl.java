@@ -51,6 +51,8 @@ public class DriverControl extends LinearOpMode
         leftGrab = hardwareMap.get(CRServo.class, "leftGrab");
         rightGrab = hardwareMap.get(CRServo.class, "rightGrab");
 
+        rightGrab.setDirection(DcMotorSimple.Direction.REVERSE);
+
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
 
@@ -99,19 +101,19 @@ public class DriverControl extends LinearOpMode
 
             if (gamepad1.dpad_up && scissorMotor.getCurrentPosition() > -11000) {  //extends scissor lift
                 scissorMotor.setPower(-speed);
-            } else if (gamepad1.dpad_down && scissorMotor.getCurrentPosition() < 1500) {  //contracts scissor lift
+            } else if (gamepad1.dpad_down && scissorMotor.getCurrentPosition() < 1300) {  //contracts scissor lift
                 scissorMotor.setPower(speed);
             } else { //stops movement if no input
                 scissorMotor.setPower(0);
             }
 
 
-            if (gamepad1.left_bumper) { //close grabber
+            if (gamepad1.right_bumper) { //close grabber
                 leftGrab.setPower(1);
-                rightGrab.setPower(-1);
-            } else if (gamepad1.right_bumper) { //open grabber
-                leftGrab.setPower(-1);
                 rightGrab.setPower(1);
+            } else if (gamepad1.left_bumper) { //open grabber
+                leftGrab.setPower(-1);
+                rightGrab.setPower(-1);
             } else { //stops
                 leftGrab.setPower(0);
                 rightGrab.setPower(0);
