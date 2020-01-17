@@ -322,7 +322,7 @@ public class SkyStoneVuforia extends LinearOpMode {
                     backStreetWheel.setPower(0);
                 }
             } else {
-                telemetry.addData("Visible Target", "none");
+                /*telemetry.addData("Visible Target", "none");
                 if (seen == 0) {
                     backStreetWheel.setPower(1);
                 }
@@ -330,7 +330,13 @@ public class SkyStoneVuforia extends LinearOpMode {
                 leftMotor.setPower(0);
                 rightMotor.setPower(0);
                 backStreetWheel.setPower(0);
-                //grab stone
+                //grab stone*/
+                leftMotor.setPower(-1);
+                rightMotor.setPower(-1);
+                sleep(1000);
+                leftMotor.setPower(0);
+                rightMotor.setPower(0);
+
             }
             telemetry.addData("list", Arrays.toString(targetsVisible));
             telemetry.update();
