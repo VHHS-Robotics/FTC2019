@@ -21,8 +21,8 @@ public class ServoTest extends LinearOpMode
         // let the driver know when we are initialized
         telemetry.addData("Status", "Initialized");
 
-        leftGrab.setPosition(0.5135);
-        rightGrab.setPosition(0.48); //0.485
+        leftGrab.setPosition(0.514);
+        rightGrab.setPosition(0.49); //0.48
 
         /*int x = 0;
         int y = 0;*/
@@ -35,8 +35,8 @@ public class ServoTest extends LinearOpMode
             if (gamepad1.left_bumper) {             //close grabber
                 /*x += 0.01;
                 y += 0.01;*/
-                leftGrab.setPosition(0.48); //0.48
-                rightGrab.setPosition(0.5237); //0.52
+                leftGrab.setPosition(0.4795); //0.48
+                rightGrab.setPosition(0.52); //0.5237
             } else if (gamepad1.right_bumper) {     //open grabber
                 leftGrab.setPosition(0.5135);
                 rightGrab.setPosition(0.484);

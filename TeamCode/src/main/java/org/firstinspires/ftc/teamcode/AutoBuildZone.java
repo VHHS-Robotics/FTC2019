@@ -26,6 +26,8 @@ public class AutoBuildZone extends LinearOpMode
             (WHEEL_DIAMETER_INCHES * 3.1415);
     private static final double speed = 0.5;
 
+    private double ticks_per_inch = 114.5915;
+
     private DcMotor leftMotor;
     private DcMotor rightMotor;
     private DcMotor strafeMotor;
@@ -33,6 +35,8 @@ public class AutoBuildZone extends LinearOpMode
 
     private Servo leftGrab;
     private Servo rightGrab;
+
+    private int right = 1;
 
 
     @Override
@@ -60,6 +64,8 @@ public class AutoBuildZone extends LinearOpMode
 
         telemetry.addData("Status", "Initialized");
         runtime.reset();
+        if (gamepad1.left_bumper)
+            right = -1;
         boolean runOnce = true;
         waitForStart();
 
@@ -68,9 +74,14 @@ public class AutoBuildZone extends LinearOpMode
             //move(0, 500, 0);
             telemetry.addData("strafeMotor", strafeMotor.getCurrentPosition());
             telemetry.update();
-            strafeMotor.setTargetPosition(1440);
+
+            strafeMotor.setTargetPosition((int)(ticks_per_inch*10));
+
             strafeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            strafeMotor.setPower(speed);
+            strafeMotor.setPower(speed*right);
+
+
+
             //Make sure this code does not repeat
             runOnce = false;
         }

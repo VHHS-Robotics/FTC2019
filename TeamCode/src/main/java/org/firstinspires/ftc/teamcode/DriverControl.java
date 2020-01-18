@@ -19,8 +19,8 @@ public class DriverControl extends LinearOpMode
     private DcMotor strafeMotor;
     private DcMotor scissorMotor;
 
-    private CRServo leftGrab;
-    private CRServo rightGrab;
+    private Servo leftGrab;
+    private Servo rightGrab;
 
     private double speed = 1.0;
     private double leftMotorSpeed = 0;
@@ -40,8 +40,8 @@ public class DriverControl extends LinearOpMode
         scissorMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         scissorMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
 
-        leftGrab = hardwareMap.get(CRServo.class, "leftGrab");
-        rightGrab = hardwareMap.get(CRServo.class, "rightGrab");
+        leftGrab = hardwareMap.get(Servo.class, "leftGrab");
+        rightGrab = hardwareMap.get(Servo.class, "rightGrab");
 
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -54,6 +54,9 @@ public class DriverControl extends LinearOpMode
         scissorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         telemetry.addData("Status:", "Initialized");
+
+        leftGrab.setPosition(0.518);
+        rightGrab.setPosition(0.48); //0.48
 
         waitForStart();
         runtime.reset();
@@ -98,6 +101,16 @@ public class DriverControl extends LinearOpMode
             }
 
             if (gamepad1.left_bumper) {             //close grabber
+                /*x += 0.01;
+                y += 0.01;*/
+                leftGrab.setPosition(0.46); //0.48
+                rightGrab.setPosition(0.54); //0.5237
+            } else if (gamepad1.right_bumper) {     //open grabber
+                leftGrab.setPosition(0.5135);
+                rightGrab.setPosition(0.484);
+            }
+            /*
+            if (gamepad1.left_bumper) {             //close grabber
                 leftGrab.setPower(1);
                 rightGrab.setPower(-1);
             } else if (gamepad1.right_bumper) {     //open grabber
@@ -106,7 +119,7 @@ public class DriverControl extends LinearOpMode
             } else {
                 leftGrab.setPower(0);
                 rightGrab.setPower(0);
-            }
+            }*/
         }
         leftMotor.setPower(0);
         rightMotor.setPower(0);
