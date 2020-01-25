@@ -1,5 +1,6 @@
 package org.firstinspires.ftc.teamcode;
 
+import com.qualcomm.ftccommon.SoundPlayer;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.CRServo;
@@ -21,6 +22,7 @@ public class DriverControl extends LinearOpMode
 
     private Servo leftGrab;
     private Servo rightGrab;
+    private Servo sideGrab;
 
     private double speed = 1.0;
     private double leftMotorSpeed = 0;
@@ -42,6 +44,7 @@ public class DriverControl extends LinearOpMode
 
         leftGrab = hardwareMap.get(Servo.class, "leftGrab");
         rightGrab = hardwareMap.get(Servo.class, "rightGrab");
+        sideGrab = hardwareMap.get(Servo.class, "sideGrab");
 
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -57,6 +60,7 @@ public class DriverControl extends LinearOpMode
 
         leftGrab.setPosition(0.518);
         rightGrab.setPosition(0.48); //0.48
+        sideGrab.setPosition(0.4);
 
         waitForStart();
         runtime.reset();
@@ -68,9 +72,15 @@ public class DriverControl extends LinearOpMode
             float move = gamepad1.left_stick_y;
             float turn = gamepad1.right_stick_x;
 
-            leftMotorSpeed = Range.clip(move + turn, -1.0, 1.0) * speed;
-            rightMotorSpeed = Range.clip(move - turn, -1.0, 1.0) * speed;
-            strafeMotorSpeed = Range.clip(strafe, -1.0, 1.0) * speed;
+            if (!finerMovement) {
+                leftMotorSpeed = Range.clip(move + turn, -1.0, 1.0);
+                rightMotorSpeed = Range.clip(move - turn, -1.0, 1.0);
+                strafeMotorSpeed = Range.clip(strafe, -1.0, 1.0);
+            } else {
+                leftMotorSpeed = speed;
+                rightMotorSpeed = speed;
+                strafeMotorSpeed = speed;
+            }
 
             leftMotor.setPower(leftMotorSpeed);
             rightMotor.setPower(rightMotorSpeed);
@@ -109,6 +119,14 @@ public class DriverControl extends LinearOpMode
                 leftGrab.setPosition(0.5135);
                 rightGrab.setPosition(0.484);
             }
+
+            if (gamepad1.x && sideGrab.getPosition() < 0.6) {
+                sideGrab.setPosition(sideGrab.getPosition()+0.01);
+            } else if (gamepad1.y && sideGrab.getPosition() > 0) {
+                sideGrab.setPosition(sideGrab.getPosition()-0.01);
+            }
+            telemetry.addData("pos side", sideGrab.getPosition());
+            telemetry.update();
             /*
             if (gamepad1.left_bumper) {             //close grabber
                 leftGrab.setPower(1);

@@ -24,7 +24,7 @@ public class AutoBuildZone extends LinearOpMode
     private static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    private static final double speed = 0.5;
+    private static final double speed = 1.0;
 
     private double ticks_per_inch = 114.5915;
 
@@ -35,9 +35,14 @@ public class AutoBuildZone extends LinearOpMode
 
     private Servo leftGrab;
     private Servo rightGrab;
+    private Servo sideGrab;
 
-    private int right = 1;
+    private Boolean isRed = null;
+    private Boolean isBuild = null;
+    private Boolean movePlate = null;
+    private Boolean parkTapeTop = null;
 
+    private int direction = 1;
 
     @Override
     public void runOpMode() {
@@ -49,6 +54,7 @@ public class AutoBuildZone extends LinearOpMode
 
         leftGrab = hardwareMap.get(Servo.class, "leftGrab");
         rightGrab = hardwareMap.get(Servo.class, "rightGrab");
+        sideGrab = hardwareMap.get(Servo.class, "sideGrab");
 
         leftMotor.setDirection(DcMotorSimple.Direction.REVERSE);
         rightMotor.setDirection(DcMotorSimple.Direction.FORWARD);
@@ -61,26 +67,115 @@ public class AutoBuildZone extends LinearOpMode
         scissorMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
         enableEncoders();
+        sideGrab.setPosition(0);
 
-        telemetry.addData("Status", "Initialized");
-        runtime.reset();
-        if (gamepad1.left_bumper)
-            right = -1;
+        //Ask questions
+        while (isRed == null) {
+
+            if (gamepad1.a) {
+                isRed = gamepad1.a;
+            }
+            if (gamepad1.b) {
+                isRed = !gamepad1.b;
+            }
+            telemetry.addData("isRed?", isRed);
+            telemetry.update();
+        }
+        sleep(250);
+        while (isBuild == null) {
+            if (gamepad1.a) {
+                isBuild = gamepad1.a;
+            }
+            if (gamepad1.b) {
+                isBuild = !gamepad1.b;
+            }
+            telemetry.addData("isBuild?", isBuild);
+            telemetry.update();
+        }
+        sleep(250);
+        while (movePlate == null) {
+            if (gamepad1.a) {
+                movePlate = gamepad1.a;
+            }
+            if (gamepad1.b) {
+                movePlate = !gamepad1.b;
+            }
+            telemetry.addData("movePlate?", movePlate);
+            telemetry.update();
+        }
+        sleep(250);
+        while (parkTapeTop == null) {
+            if (gamepad1.a) {
+                parkTapeTop = gamepad1.a;
+            }
+            if (gamepad1.b) {
+                parkTapeTop = !gamepad1.b;
+            }
+            telemetry.addData("parkTapeTop?", parkTapeTop);
+            telemetry.update();
+        }
+
         boolean runOnce = true;
         waitForStart();
 
 
-        while (opModeIsActive()){// && runOnce) {
-            //move(0, 500, 0);
-            telemetry.addData("strafeMotor", strafeMotor.getCurrentPosition());
-            telemetry.update();
+        while (opModeIsActive() && runOnce) {
+            telemetry.addData("leftMotor.isBusy()", leftMotor.isBusy());
+            telemetry.addData("rightMotor.isBusy()", rightMotor.isBusy());
+//            telemetry.addData("strafeMotor", strafeMotor.getCurrentPosition());
+//            telemetry.update();
 
-            strafeMotor.setTargetPosition((int)(ticks_per_inch*10));
-
-            strafeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
-            strafeMotor.setPower(speed*right);
-
-
+            // @TODO make scissor lift lower while moving to fit under bridge
+            // @TODO ALL MEASUREMENTS ARE ARBITRARY
+            if (!isRed) {
+                direction = -1; // multiply times distance
+            }
+            if (isBuild) {
+                if (movePlate) {
+                    leftRight(-24);
+                    forwardBackward(-35);
+                    leftRight(-10);
+                    // GRAB
+                    leftRight(29);
+                    // DROP
+                    forwardBackward(35);
+                }
+                leftRight(-15);
+                forwardBackward(47);
+                leftRight(-6);
+                leftRight(15);
+                // GRAB
+                forwardBackward(-47);
+                // DROP
+                if(!parkTapeTop) {
+                    leftRight(19);
+                }
+                forwardBackward(12);
+            } else {
+                forwardBackward(12);
+                leftRight(-25);
+                // GRAB
+                leftRight(5);
+                forwardBackward(-47);
+                // DROP
+                if (movePlate) {
+                    forwardBackward(12);
+                    leftRight(-5);
+                    // GRAB
+                    leftRight(29);
+                    // DROP
+                }
+                forwardBackward(59);
+                leftRight(-30);
+                // GRAB
+                leftRight(5);
+                forwardBackward(-47);
+                // DROP
+                if (!parkTapeTop) {
+                    leftRight(26);
+                }
+                forwardBackward(12);
+            }
 
             //Make sure this code does not repeat
             runOnce = false;
@@ -88,6 +183,46 @@ public class AutoBuildZone extends LinearOpMode
     }
 
     //TODO fix this and test it
+
+    private void leftRight(int distance) {
+        strafeMotor.setTargetPosition(strafeMotor.getCurrentPosition() + (int)(ticks_per_inch*distance));
+        strafeMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        strafeMotor.setPower(speed);
+        /*if (distance > 0) {
+            strafeMotor.setPower(speed);
+        } else {
+            strafeMotor.setPower(-speed);
+        }*/
+        while (strafeMotor.isBusy()) {}
+        //strafeMotor.setPower(0);
+        sleep(1000);
+
+    }
+
+    private void forwardBackward(int distance) {
+        leftMotor.setTargetPosition(leftMotor.getCurrentPosition() + (int)(ticks_per_inch*distance*direction));
+        rightMotor.setTargetPosition(leftMotor.getCurrentPosition() + (int)(ticks_per_inch*distance*direction));
+
+        leftMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+        rightMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+
+        leftMotor.setPower(speed);
+        rightMotor.setPower(speed);//0.905);
+        /*
+        if (distance > 0) {
+            leftMotor.setPower(speed*direction);
+            rightMotor.setPower(speed*direction);
+        } else {
+            leftMotor.setPower(-speed*direction);
+            rightMotor.setPower(-speed*direction);
+        }*/
+        while (rightMotor.isBusy()) {}
+        sleep(1000);
+        /*leftMotor.setPower(0);
+        rightMotor.setPower(0);*/
+
+    }
+
     private void move(float strafeY,float strafeX, float turn){
         int leftMotorNew;
         int rightMotorNew;
