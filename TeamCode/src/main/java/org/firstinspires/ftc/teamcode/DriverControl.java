@@ -60,7 +60,7 @@ public class DriverControl extends LinearOpMode
 
         leftGrab.setPosition(0.518);
         rightGrab.setPosition(0.48); //0.48
-        sideGrab.setPosition(0.4);
+        sideGrab.setPosition(0);
 
         waitForStart();
         runtime.reset();
@@ -120,7 +120,7 @@ public class DriverControl extends LinearOpMode
                 rightGrab.setPosition(0.484);
             }
 
-            if (gamepad1.x && sideGrab.getPosition() < 0.6) {
+            if (gamepad1.x && sideGrab.getPosition() < 0.8) {
                 sideGrab.setPosition(sideGrab.getPosition()+0.01);
             } else if (gamepad1.y && sideGrab.getPosition() > 0) {
                 sideGrab.setPosition(sideGrab.getPosition()-0.01);

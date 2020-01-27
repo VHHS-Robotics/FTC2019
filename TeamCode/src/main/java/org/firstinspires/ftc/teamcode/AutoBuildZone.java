@@ -24,7 +24,7 @@ public class AutoBuildZone extends LinearOpMode
     private static final double WHEEL_DIAMETER_INCHES = 4.0;     // For figuring circumference
     private static final double COUNTS_PER_INCH = (COUNTS_PER_MOTOR_REV * DRIVE_GEAR_REDUCTION) /
             (WHEEL_DIAMETER_INCHES * 3.1415);
-    private static final double speed = 1.0;
+    private static double speed = 1.0;
 
     private double ticks_per_inch = 114.5915;
 
@@ -41,6 +41,7 @@ public class AutoBuildZone extends LinearOpMode
     private Boolean isBuild = null;
     private Boolean movePlate = null;
     private Boolean parkTapeTop = null;
+    private Boolean grabStone = null;
 
     private int direction = 1;
 
@@ -114,6 +115,17 @@ public class AutoBuildZone extends LinearOpMode
             telemetry.addData("parkTapeTop?", parkTapeTop);
             telemetry.update();
         }
+        sleep(250);
+        while (grabStone == null && isBuild) {
+            if (gamepad1.a) {
+                grabStone = gamepad1.a;
+            }
+            if (gamepad1.b) {
+                grabStone = !gamepad1.b;
+            }
+            telemetry.addData("grabStone?", grabStone);
+            telemetry.update();
+        }
 
         boolean runOnce = true;
         waitForStart();
@@ -127,50 +139,68 @@ public class AutoBuildZone extends LinearOpMode
 
             // @TODO make scissor lift lower while moving to fit under bridge
             // @TODO ALL MEASUREMENTS ARE ARBITRARY
+            sideGrab.setPosition(0);
+            scissorMotor.setTargetPosition(-2000);
+            scissorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            scissorMotor.setPower(speed);
+            while (scissorMotor.isBusy()) { Thread.yield();}
+            leftGrab.setPosition(0.46);
+            rightGrab.setPosition(0.54);
+            scissorMotor.setTargetPosition(1100);
+            scissorMotor.setMode(DcMotor.RunMode.RUN_TO_POSITION);
+            scissorMotor.setPower(speed);
+            while (scissorMotor.isBusy()) { Thread.yield();}
+            sideGrab.setPosition(0);
             if (!isRed) {
                 direction = -1; // multiply times distance
             }
             if (isBuild) {
                 if (movePlate) {
                     leftRight(-24);
-                    forwardBackward(-35);
-                    leftRight(-10);
-                    // GRAB
-                    leftRight(29);
-                    // DROP
+                    forwardBackward(-40);
+                    leftRight(-15);
+                    sideGrab.setPosition(0.8);
+                    speed = 0.5;
+                    leftRight(70);
+                    speed = 1.0;
+                    sideGrab.setPosition(0);
                     forwardBackward(35);
                 }
-                leftRight(-15);
-                forwardBackward(47);
-                leftRight(-6);
-                leftRight(15);
-                // GRAB
-                forwardBackward(-47);
-                // DROP
-                if(!parkTapeTop) {
-                    leftRight(19);
+                if (grabStone) {
+                    leftRight(-15);
+                    forwardBackward(50);
+                    leftRight(-20);
+                    sideGrab.setPosition(0.8);
+                    leftRight(26);
+                    forwardBackward(-50);
+                    sideGrab.setPosition(0);
                 }
-                forwardBackward(12);
-            } else {
-                forwardBackward(12);
-                leftRight(-25);
-                // GRAB
-                leftRight(5);
-                forwardBackward(-47);
-                // DROP
+                if(parkTapeTop) {
+                    leftRight(-19);
+                }
+                forwardBackward(20);
+            } else { // land side
+                forwardBackward(15);
+                leftRight(-40);
+                sideGrab.setPosition(0.8);
+                speed = 0.5;
+                leftRight(13);
+                speed = 1.0;
+                forwardBackward(-50);
+                sideGrab.setPosition(0);
                 if (movePlate) {
                     forwardBackward(12);
                     leftRight(-5);
-                    // GRAB
+                    sideGrab.setPosition(0.8);
                     leftRight(29);
-                    // DROP
+                    sideGrab.setPosition(0);
                 }
                 forwardBackward(59);
                 leftRight(-30);
-                // GRAB
+                sideGrab.setPosition(0.8);
                 leftRight(5);
                 forwardBackward(-47);
-                // DROP
+                sideGrab.setPosition(0);
                 if (!parkTapeTop) {
                     leftRight(26);
                 }
@@ -193,9 +223,9 @@ public class AutoBuildZone extends LinearOpMode
         } else {
             strafeMotor.setPower(-speed);
         }*/
-        while (strafeMotor.isBusy()) {}
+        while (strafeMotor.isBusy()) { Thread.yield(); }
         //strafeMotor.setPower(0);
-        sleep(1000);
+
 
     }
 
@@ -216,8 +246,7 @@ public class AutoBuildZone extends LinearOpMode
             leftMotor.setPower(-speed*direction);
             rightMotor.setPower(-speed*direction);
         }*/
-        while (rightMotor.isBusy()) {}
-        sleep(1000);
+        while (rightMotor.isBusy()) { Thread.yield(); }
         /*leftMotor.setPower(0);
         rightMotor.setPower(0);*/
 
